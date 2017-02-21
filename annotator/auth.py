@@ -3,13 +3,19 @@ import datetime
 import iso8601
 import jwt
 import six
+from flask import current_app
+from pprint import pprint
 
 DEFAULT_TTL = 86400
 
 
 class Consumer(object):
-    def __init__(self, key):
-        self.key = key
+    def get(self,consumerKey):
+        consumer = current_app.config['CONSUMER_DB'][consumerKey]
+        self.secret = consumer['secret']
+        self.key = consumer['consumerKey']
+        self.ttl = consumer['ttl']
+        return self
 
 
 class User(object):
@@ -20,8 +26,9 @@ class User(object):
 
     @classmethod
     def from_token(cls, token):
+        consumer = Consumer()
         return cls(token['userId'],
-                   Consumer(token['consumerKey']),
+                   consumer.get(token['consumerKey']),
                    token.get('admin', False))
 
 
@@ -88,9 +95,10 @@ class Authenticator(object):
             return False
 
         try:
-            return decode_token(token,
+            decoded= decode_token(token,
                                 secret=consumer.secret,
                                 ttl=consumer.ttl)
+            return decoded
         except TokenInvalid:  # catch inauthentic or expired tokens
             return False
 

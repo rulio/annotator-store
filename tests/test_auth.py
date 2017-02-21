@@ -1,6 +1,10 @@
 import datetime
 import hashlib
 import time
+import logging
+
+logger = logging.getLogger('test')
+logger.setLevel(logging.DEBUG)
 
 from nose.tools import *
 from mock import Mock, patch
@@ -43,6 +47,14 @@ class TestAuthBasics(object):
     def test_decode_token(self):
         tok = auth.encode_token({}, 'secret')
         assert auth.decode_token(tok, 'secret'), "token should have been successfully decoded"
+
+    def test_decode_token_finder(self):
+        token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb25zdW1lcktleSI6ImI4YjVlOTRkNGFkNDQxYWU5ZmYwYWE3Y2U1ZDA2ZWUyIiwidXNlcklkIjoiYWxpY2UiLCJpc3N1ZWRBdCI6IjIwMTctMDItMTZUMTY6NDk6MDcrMDA6MDAiLCJ0dGwiOjg0NjAwfQ.Z_ssQGCRDTAQh8Zpp3VIIFvhttyXyM4q45AgZS8oZUs'
+        secret = 'secret'
+        decoded = auth.decode_token(token,secret,3000,True)
+        print decoded
+
+
 
     def test_decode_token_unicode(self):
         tok = auth.encode_token({}, 'secret')
